@@ -16,7 +16,12 @@ class Product(Base):
     image_url: Mapped[Optional[str]] = mapped_column(String(500))
     is_active: Mapped[bool] = mapped_column(default=True)
 
-    variants: Mapped[List["ProductVariant"]] = relationship("ProductVariant", back_populates="product")
+    variants: Mapped[List["ProductVariant"]] = relationship(
+        "ProductVariant",
+        back_populates="product",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    )
 
 
 class ProductVariant(Base):
