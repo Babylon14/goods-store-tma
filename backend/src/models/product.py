@@ -1,7 +1,7 @@
-from sqlalchemy import String, Text, ForeignKey, Decimal
+from decimal import Decimal as PyDecimal
+from sqlalchemy import String, Text, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List, Optional
-from decimal import Decimal as PyDecimal
 
 from src.db.base_class import Base
 
@@ -32,7 +32,7 @@ class ProductVariant(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey("product.id", ondelete="CASCADE"))
 
     size_name: Mapped[str] = mapped_column(String(50)) # "100 мл", "500 мл", "1 л"
-    price: Mapped[PyDecimal] = mapped_column(Decimal(10, 2))
+    price: Mapped[PyDecimal] = mapped_column(Numeric(10, 2))
     stock: Mapped[int] = mapped_column(default=0)  # Количество в наличии
 
     product: Mapped["Product"] = relationship("Product", back_populates="variants")
