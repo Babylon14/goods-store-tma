@@ -35,6 +35,29 @@ class BaseRepository(Generic[ModelType]):
         return db_obj
 
 
+    async def update(self, db_obj: ModelType, obj_in_data: dict | Any) -> ModelType:
+        """
+        Обновить запись в базе.
+        db_obj: объект из базы, который мы уже получили через get()
+        obj_in_data: либо словарь с новыми данными, либо Pydantic-схема
+        """
+        # Если пришла Pydantic-схема, превращаем её в словарь, исключая неустановленные поля
+        if isinstance(obj_in_data, dict):
+            update_data = obj_in_data
+        else:
+            update_data = obj_in_data.model_dump(exclude_unset=True)
+
+        # Обновляем атрибуты объекта
+        for field in update_data:
+            if hasattr(db_obj, field):
+                setattr(db_obj, field, update_data[field])
+        
+        self.session.add(db_obj)
+        await self.session.flush() # Сохраняем изменения в текущей транзакции
+        await self.session.refresh(db_obj) # Обновляем объект данными из базы
+        return db_obj
+
+
     async def delete(self, id: Any) -> bool:
         """Удалить запись по ID"""
         query = delete(self.model).where(self.model.id == id)
