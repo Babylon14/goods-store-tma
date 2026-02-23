@@ -24,9 +24,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
     # --- TELEGRAM ---
-    TG_BOT_TOKEN: str
+    BOT_TOKEN: str
     PAYMENT_PROVIDER_TOKEN: str
-    TG_CHAT_ID: int
+    MANAGER_ID: int
 
     model_config = SettingsConfigDict(
         env_file=".env",
