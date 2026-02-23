@@ -7,4 +7,6 @@ node_modules/
 dist/
 .DS_Store
 
-
+# Игнорируем папку с загрузками
+backend/uploads/
+uploads/

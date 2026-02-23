@@ -34,7 +34,8 @@ services:
       dockerfile: backend/Dockerfile
     volumes:
       - .:/app                
-      - /app/.venv            
+      - /app/.venv   
+      - ./backend/uploads:/app/uploads         
     env_file: .env
     ports:
       - "8000:8000"
