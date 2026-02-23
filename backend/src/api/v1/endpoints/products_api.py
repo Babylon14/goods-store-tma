@@ -1,9 +1,10 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 
 from src.schemas.product_schema import ProductCreate, ProductRead, ProductUpdate
 from src.repositories.product_repository import ProductRepository
-from backend.src.api.dependencies import get_product_repo
+from src.api.dependencies import get_product_repo
+from src.services.file_service import save_upload_file
 
 
 router = APIRouter()
@@ -60,3 +61,16 @@ async def delete_product(
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Товар не найден")
     return None
+
+
+@router.post(path="/upload-image")
+async def upload_product_image(file: UploadFile = File(...)):
+    """Загрузить картинку и получить её URL"""
+
+    # Проверка расширения
+    if not file.content_type.startswith("image/") or not file.filename.endswith((".jpg", ".jpeg", ".png")):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Неподходящий тип файла")
+    
+    file_url = await save_upload_file(file)
+    return {"image_url": file_url}
+

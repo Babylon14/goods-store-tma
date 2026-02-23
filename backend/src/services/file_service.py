@@ -26,3 +26,4 @@ async def save_upload_file(upload_file: UploadFile, folder: str = "products") ->
 
     # 4. Возвращаем путь, который будет храниться в БД
     return f"/static/{folder}/{file_name}"
+
