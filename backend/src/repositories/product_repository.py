@@ -41,7 +41,7 @@ class ProductRepository(BaseRepository[Product]):
         Специальный метод создания, который умеет сразу добавлять варианты.
         Ожидает, что в словаре obj_in_data есть ключ 'variants' со списком словарей.
         """
-        variants_data = obj_in_data.pip("variants", [])
+        variants_data = obj_in_data.pop("variants", [])
 
         # Создание объекта товара
         db_obj = self.model(**obj_in_data)
@@ -53,6 +53,7 @@ class ProductRepository(BaseRepository[Product]):
 
         self.session.add(db_obj)
         await self.session.flush()
+        await self.session.commit()
         await self.session.refresh(db_obj)
         return db_obj
     
