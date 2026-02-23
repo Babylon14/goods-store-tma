@@ -30,6 +30,7 @@ COPY backend/migrations ./backend/migrations
 COPY backend/src ./src
 
 # Добавляем виртуальное окружение в PATH
+ENV PYTHONPATH=/app/backend:/app
 ENV PATH="/app/.venv/bin:$PATH"
 # Отключаем генерацию .pyc файлов и включаем буферизацию логов
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -39,5 +40,4 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8000
 
 # Запуск приложения
-CMD ["fastapi", "run", "src/main.py", "--host", "0.0.0.0", "--port", "8000"]
-
+CMD ["fastapi", "run", "backend/src/main.py", "--host", "0.0.0.0", "--port", "8000"]

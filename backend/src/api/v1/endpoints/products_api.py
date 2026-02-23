@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.schemas.product_schema import ProductCreate, ProductRead, ProductUpdate
 from src.repositories.product_repository import ProductRepository
-from src.api.dependercies import get_product_repo
+from backend.src.api.dependencies import get_product_repo
 
 
 router = APIRouter()

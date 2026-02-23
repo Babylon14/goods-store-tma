@@ -5,8 +5,8 @@ from typing import List, Optional
 
 # --- Схемы для Вариантов (Объемов) Товара ---
 class ProductVariantBase(BaseModel):
-    size_name: str = Field(..., examples="XL")
-    price: PyDecimal = Field(..., gt=0, examples="1500.00")
+    size_name: str = Field(..., examples=["500 мл"])
+    price: PyDecimal = Field(..., gt=0, examples=[1500.00])
     stock: int = Field(default=0, ge=0)
 
 
@@ -24,11 +24,10 @@ class ProductVariantRead(ProductVariantBase):
 
 # --- Схемы для Самого Товара ---
 class ProductBase(BaseModel):
-    title: str = Field(..., min_length=2, max_length=255)
-    description: Optional[str] = None
+    title: str = Field(..., min_length=2, max_length=255, examples=["Свеча"])
+    description: Optional[str] = Field(None, examples=["Описание товара"])
     image_url: Optional[str] = None
     is_active: bool = True
-
 
 class ProductCreate(ProductBase):
     """Схема для создания товара вместе с его вариантами"""
