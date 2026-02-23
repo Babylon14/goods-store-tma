@@ -8,5 +8,5 @@ dist/
 .DS_Store
 
 # Игнорируем папку с загрузками
-backend/uploads/
-uploads/
+backend/uploads/*
+!backend/uploads/.gitkeep
