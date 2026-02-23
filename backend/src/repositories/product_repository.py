@@ -4,6 +4,7 @@ from sqlalchemy.orm import selectinload
 
 from src.repositories.base_repository import BaseRepository
 from src.models.product import Product, ProductVariant
+from src.services.file_service import delete_file
 
 
 class ProductRepository(BaseRepository[Product]):
@@ -58,3 +59,24 @@ class ProductRepository(BaseRepository[Product]):
         return db_obj
     
     
+    async def delete(self, id: int) -> bool:
+        """Удаляет товар и его изображение"""
+
+        # 1. Находим товар перед удалением
+        db_obj = await self.get(id)
+        if not db_obj:
+            return False
+        
+        # Запоминаем URL картинки
+        image_to_delete = db_obj.image_url
+
+        # 2. Удаляем запись из БД (вызываем базовый метод или делаем вручную)
+        await self.session.delete(db_obj)
+        await self.session.commit()
+
+        # 3. Если в базе всё удалено — чистим диск
+        if image_to_delete:
+            delete_file(image_to_delete)
+        return True
+
+
