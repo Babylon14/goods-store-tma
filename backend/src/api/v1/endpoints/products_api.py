@@ -33,7 +33,7 @@ async def get_product(
     product_repo: ProductRepository = Depends(get_product_repo)
 ):
     """Получить один товар со всеми его вариантами по ID."""
-    return await product_repo.get_with_variants(product_id=product_id)
+    return await product_repo.get_with_variants(product_id)
 
 
 @router.patch(path="/{product_id}", response_model=ProductRead)
@@ -44,9 +44,10 @@ async def update_product(
 ):
     """Обновить данные товара (название, описание и т.д.).
     Использует метод update из базового репозитория."""
-    product = await product_repo.get(product_id=product_id)
+    product = await product_repo.get(product_id)
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Товар не найден")
+    return await product_repo.update(db_obj=product, obj_in_data=product_in)
 
 
 @router.delete(path="/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -55,7 +56,7 @@ async def delete_product(
     product_repo: ProductRepository = Depends(get_product_repo)
 ):
     """Удалить товар по ID."""
-    success = await product_repo.delete(product_id=product_id)
+    success = await product_repo.delete(product_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Товар не найден")
     return None

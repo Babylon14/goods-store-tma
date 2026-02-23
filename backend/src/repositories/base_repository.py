@@ -53,7 +53,7 @@ class BaseRepository(Generic[ModelType]):
                 setattr(db_obj, field, update_data[field])
         
         self.session.add(db_obj)
-        await self.session.flush() # Сохраняем изменения в текущей транзакции
+        await self.session.commit()
         await self.session.refresh(db_obj) # Обновляем объект данными из базы
         return db_obj
 
