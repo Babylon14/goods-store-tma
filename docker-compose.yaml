@@ -57,6 +57,24 @@ services:
       - redis
       - db
 
+  # --- TELEGRAM BOT ---
+  bot:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    volumes:
+      - .:/app
+      - /app/.venv
+      - ./backend/uploads:/app/backend/uploads
+    environment:
+      - PYTHONPATH=/app/backend:/app
+      - DATABASE_URL=${DATABASE_URL}
+      - BOT_TOKEN=${BOT_TOKEN}
+    command: python -m backend.src.bot_main
+    depends_on:
+      - db
+      - backend
+
 volumes:
   postgres_data:
 
