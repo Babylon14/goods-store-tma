@@ -24,10 +24,11 @@ class ProductVariantRead(ProductVariantBase):
 
 # --- Схемы для Самого Товара ---
 class ProductBase(BaseModel):
-    title: str = Field(..., min_length=2, max_length=255, examples=["Свеча"])
+    title: str = Field(..., min_length=2, max_length=255, examples=["Сумка"])
     description: Optional[str] = Field(None, examples=["Описание товара"])
-    image_url: Optional[str] = None
+    image_url: Optional[str] = Field(None, examples=["/static/products/default.jpg"])
     is_active: bool = True
+
 
 class ProductCreate(ProductBase):
     """Схема для создания товара вместе с его вариантами"""

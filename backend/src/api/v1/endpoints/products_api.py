@@ -1,9 +1,10 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 
 from src.schemas.product_schema import ProductCreate, ProductRead, ProductUpdate
 from src.repositories.product_repository import ProductRepository
-from backend.src.api.dependencies import get_product_repo
+from src.api.dependencies import get_product_repo
+from src.services.file_service import save_upload_file
 
 
 router = APIRouter()
@@ -33,7 +34,7 @@ async def get_product(
     product_repo: ProductRepository = Depends(get_product_repo)
 ):
     """Получить один товар со всеми его вариантами по ID."""
-    return await product_repo.get_with_variants(product_id=product_id)
+    return await product_repo.get_with_variants(product_id)
 
 
 @router.patch(path="/{product_id}", response_model=ProductRead)
@@ -44,9 +45,10 @@ async def update_product(
 ):
     """Обновить данные товара (название, описание и т.д.).
     Использует метод update из базового репозитория."""
-    product = await product_repo.get(product_id=product_id)
+    product = await product_repo.get(product_id)
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Товар не найден")
+    return await product_repo.update(db_obj=product, obj_in_data=product_in)
 
 
 @router.delete(path="/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -55,7 +57,20 @@ async def delete_product(
     product_repo: ProductRepository = Depends(get_product_repo)
 ):
     """Удалить товар по ID."""
-    success = await product_repo.delete(product_id=product_id)
+    success = await product_repo.delete(product_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Товар не найден")
     return None
+
+
+@router.post(path="/upload-image")
+async def upload_product_image(file: UploadFile = File(...)):
+    """Загрузить картинку и получить её URL"""
+
+    # Проверка расширения
+    if not file.content_type.startswith("image/") or not file.filename.endswith((".jpg", ".jpeg", ".png")):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Неподходящий тип файла")
+    
+    file_url = await save_upload_file(file)
+    return {"image_url": file_url}
+
