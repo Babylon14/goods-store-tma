@@ -1,9 +1,11 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
+from aiogram.types import Message
+from aiogram.filters import Command
 
 from src.core.config import settings
-from src.bot.handlers import catalog
+from src.bot.handlers.catalog import router as catalog_router
 
 
 async def main():
@@ -17,7 +19,11 @@ async def main():
     dp = Dispatcher()
 
     # Регистрируем роутеры
-    dp.include_router(catalog.router)
+    dp.include_router(catalog_router)
+
+    @dp.message(Command("start"))
+    async def send_welcome(message: Message):
+        await message.answer(f"Привет {message.from_user.first_name}! Я бот для интернет-магазина.")
 
     logging.info("Бот запущен и готов к работе...")
     await dp.start_polling(bot)

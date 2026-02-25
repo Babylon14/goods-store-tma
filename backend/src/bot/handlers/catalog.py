@@ -1,43 +1,48 @@
-from aiogram import Router, F
-from aiogram.types import Message, URLInputFile
+import os
+from aiogram import Router
 from aiogram.filters import Command
-
+from aiogram.types import Message, FSInputFile
 from src.bot.services.api_client import shop_api
 
 
 router = Router()
 
-@router.message(Command("/catalog"))
+@router.message(Command("catalog"))
 async def show_catalog(message: Message):
-    """ Показать каталог товаров """
-    product = await shop_api.get_products()
-
-    if not product:
-        await message.answer("Каталог пуст")
-        return
+    # Используем logging вместо print для надежности
+    import logging
+    logging.info("--- ХЕНДЛЕР КАТАЛОГА ВЫЗВАН ---")
     
-    for prod in product:
-        caption = f"<b>{prod['title']}</b>\n\n{prod.get('description', '')}\n"
+    products = await shop_api.get_products()
+    logging.info(f"ДАННЫЕ ИЗ API: {products}")
 
-        # Добавляем варианты (цены)
+    if not products:
+        await message.answer("Каталог пока пуст.")
+        return
+
+    for prod in products:
+        caption = f"<b>{prod['title']}</b>\n\n{prod.get('description') or ''}\n"
+        
         if prod.get("variants"):
-            for variant in prod["variants"]:
-                caption += f"\n💰 {variant['size_name']}: {variant['price']} руб."
+            for v in prod["variants"]:
+                caption += f"\n💰 {v['size_name']}: {v['price']} руб."
 
-        # Если есть картинка, отправляем фото, если нет - только текст
-        if prod.get("image_url"):
-            # Внутри Docker-сети обращаемся к backend:8000
-            image_url = f"http://backend:8000{prod['image_url']}"
-            try:
+        image_url = prod.get("image_url")
+        if image_url:
+            # Превращаем /static/products/file.jpg в /app/backend/uploads/products/file.jpg
+            # Путь должен быть абсолютным внутри контейнера!
+            file_path = os.path.join("/app/backend", image_url.lstrip("/").replace("static", "uploads", 1))
+            
+            if os.path.exists(file_path):
                 await message.answer_photo(
-                    photo=URLInputFile(image_url),
+                    photo=FSInputFile(file_path),
                     caption=caption,
                     parse_mode="HTML"
                 )
-            except Exception as err:
-                # Если фото не загрузилось, отправим хотя бы текст
-                await message.answer(f"{caption}\n\n<i>(Ошибка загрузки фото)</i>", parse_mode="HTML")
-        else:
-            await message.answer(caption, parse_mode="HTML")
+                continue # Переходим к следующему товару
 
-            
+        # Если фото нет или путь неверный - шлем текст
+        await message.answer(caption, parse_mode="HTML")
+
+
+        
