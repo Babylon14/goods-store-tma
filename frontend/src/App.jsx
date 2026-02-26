@@ -4,15 +4,21 @@ import './App.css'
 function App() {
   const [products, setProducts] = useState([])
 
+  // ЗАМЕНИ ЭТУ ПЕРЕМЕННУЮ на твою ссылку бэкенда (порт 8000)
+  const API_URL = "https://precerebroid-unpromotional-stefanie.ngrok-free.dev"; 
+
   useEffect(() => {
-    // 1. Инициализируем Telegram WebApp
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.ready()
     }
 
-    // 2. Запрашиваем товары у бэкенда
-    // Используем localhost, так как запрос делает твой БРАУЗЕР
-    fetch('http://localhost:8000/api/v1/products/')
+    // 2. Запрашиваем товары у бэкенда по НОВОЙ ССЫЛКЕ
+    fetch(`${API_URL}/api/v1/products/`, {
+      headers: {
+        // Этот заголовок убирает страницу-предупреждение ngrok
+        'ngrok-skip-browser-warning': 'true'
+      }
+    }) 
       .then(res => res.json())
       .then(data => {
         console.log("Получили товары:", data)
@@ -25,11 +31,12 @@ function App() {
     <div style={{ padding: '20px', color: 'white' }}>
       <h1>Магазин TMA 🛍️</h1>
       <div style={{ display: 'grid', gap: '20px' }}>
+        {products.length === 0 && <p>Загрузка товаров...</p>}
         {products.map(product => (
           <div key={product.id} style={{ border: '1px solid #ccc', borderRadius: '10px', padding: '10px' }}>
-            {/* Добавляем картинку с бэкенда */}
+            {/* Картинка теперь тоже берется по НОВОЙ ССЫЛКЕ */}
             <img 
-              src={`http://localhost:8000${product.image_url}`} 
+              src={`${API_URL}${product.image_url}`} 
               alt={product.title} 
               style={{ width: '100%', borderRadius: '8px' }} 
             />

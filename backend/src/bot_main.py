@@ -6,7 +6,10 @@ from aiogram.filters import Command
 
 from src.core.config import settings
 from src.bot.handlers.catalog import router as catalog_router
+from src.bot.keyboards.keyboadrs import get_main_menu
 
+
+WEBAPP_URL = "https://precerebroid-unpromotional-stefanie.ngrok-free.dev"
 
 async def main():
     # Включаем логирование
@@ -23,7 +26,11 @@ async def main():
 
     @dp.message(Command("start"))
     async def send_welcome(message: Message):
-        await message.answer(f"Привет {message.from_user.first_name}! Я бот для интернет-магазина.")
+        await message.answer(
+            f"Привет, {message.from_user.first_name}! 👋\n"
+            "Добро пожаловать в наш новый магазин.",
+            reply_markup=get_main_menu(WEBAPP_URL)
+        )
 
     logging.info("Бот запущен и готов к работе...")
     await dp.start_polling(bot)

@@ -10,8 +10,9 @@ app = FastAPI(title="Goods Store TMA API", version="1.0.0")
 
 # Список разрешенных адресов
 origins = [
-    "http://localhost:5173",    # Наш фронтенд при разработке
-    "http://127.0.0.1:5173",    # Наш фронтенд при разработке
+    "http://localhost:5173",    # Для локальных тестов без Nginx
+    "http://127.0.0.1:5173",    
+    "https://precerebroid-unpromotional-stefanie.ngrok-free.dev",
 ]
 
 app.add_middleware(
