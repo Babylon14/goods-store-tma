@@ -10,7 +10,7 @@ from src.bot.handlers.catalog import router as catalog_router
 from src.bot.keyboards.keyboadrs import get_main_menu
 
 
-WEBAPP_URL = "https://yzgbjiwk5v6k.share.zrok.io"
+WEBAPP_URL = os.getenv("APP_URL", "").strip()
 
 async def main():
     # Включаем логирование
@@ -30,7 +30,7 @@ async def main():
         await message.answer(
             f"Привет, {message.from_user.first_name}! 👋\n"
             "Добро пожаловать в наш новый магазин.",
-            reply_markup=get_main_menu(WEBAPP_URL)
+            reply_markup=get_main_menu(url=WEBAPP_URL)
         )
 
     logging.info("Бот запущен и готов к работе...")
@@ -39,4 +39,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
 

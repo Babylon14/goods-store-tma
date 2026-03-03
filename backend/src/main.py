@@ -1,10 +1,16 @@
 import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.v1.endpoints.products_api import router as product_router
 
+
+load_dotenv()
+
+# Получаем ссылку, если её нет — ставим localhost по умолчанию
+APP_URL = os.getenv("APP_URL", "http://localhost").strip()
 
 app = FastAPI(title="Goods Store TMA API", version="1.0.0")
 
@@ -13,7 +19,7 @@ origins = [
     "http://localhost",          # Доступ через Nginx локально
     "http://localhost:5173",     # Прямой доступ к Vite (на всякий случай)
     "http://127.0.0.1",          # Доступ через IP локально
-    "https://yzgbjiwk5v6k.share.zrok.io",     # Доступ через текущий туннель zrok
+    APP_URL,     # Доступ через текущий туннель zrok
 ]
 
 app.add_middleware(
