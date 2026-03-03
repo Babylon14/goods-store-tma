@@ -5,11 +5,12 @@ function App() {
   const [products, setProducts] = useState([])
 
   // ЗАМЕНИ ЭТУ ПЕРЕМЕННУЮ на твою ссылку бэкенда (порт 8000)
-  const API_URL = "https://precerebroid-unpromotional-stefanie.ngrok-free.dev"; 
+  const API_URL = window.location.origin; 
 
   useEffect(() => {
     if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.ready()
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand(); // Развернуть Mini App на полную ширину
     }
 
     // 2. Запрашиваем товары у бэкенда по НОВОЙ ССЫЛКЕ

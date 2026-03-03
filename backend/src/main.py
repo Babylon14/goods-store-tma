@@ -10,14 +10,15 @@ app = FastAPI(title="Goods Store TMA API", version="1.0.0")
 
 # Список разрешенных адресов
 origins = [
-    "http://localhost:5173",    # Для локальных тестов без Nginx
-    "http://127.0.0.1:5173",    
-    "https://precerebroid-unpromotional-stefanie.ngrok-free.dev",
+    "http://localhost",          # Доступ через Nginx локально
+    "http://localhost:5173",     # Прямой доступ к Vite (на всякий случай)
+    "http://127.0.0.1",          # Доступ через IP локально
+    "https://1gu8xccd4qvb.share.zrok.io", # Доступ через текущий туннель zrok
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,             # Разрешаем запросы с этих адресов
+    allow_origins=["*"],             # Разрешаем запросы с этих адресов
     allow_credentials=True,
     allow_methods=["*"],               # Разрешаем все методы (GET, POST и т.д.)
     allow_headers=["*"],               # Разрешаем все заголовки

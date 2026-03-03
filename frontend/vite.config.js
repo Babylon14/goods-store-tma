@@ -5,12 +5,17 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: true, // Позволяет слушать все сетевые интерфейсы внутри Docker
+    port: 5173,
+    strictPort: true, // Гарантирует, что Vite всегда будет на 5173
     allowedHosts: [
-      'precerebroid-unpromotional-stefanie.ngrok-free.dev', // Твоя ссылка из ngrok
-      '.ngrok-free.dev' // Или можно разрешить все поддомены ngrok сразу
-    ],
-    host: true, // Это чтобы Docker мог пробрасывать порт
-    port: 5173
+      'frontend',
+      '.zrok.io',   // Разрешает все поддомены zrok
+      'localhost',  // Разрешает локальный доступ
+      '.loca.lt',    // Можно оставить на всякий случай
+      '.pinggy.link',
+    ]
   }
 })
+
 

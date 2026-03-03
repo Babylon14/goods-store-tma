@@ -9,7 +9,7 @@ from src.bot.handlers.catalog import router as catalog_router
 from src.bot.keyboards.keyboadrs import get_main_menu
 
 
-WEBAPP_URL = "https://precerebroid-unpromotional-stefanie.ngrok-free.dev"
+WEBAPP_URL = "https://1gu8xccd4qvb.share.zrok.io"
 
 async def main():
     # Включаем логирование
