@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import './App.css'
 
 function App() {
+  const [selectedImage, setSelectedImage] = useState(null);
   const [products, setProducts] = useState([])
   const [cart, setCart] = useState({})
   const [screen, setScreen] = useState('main') // 'main' или 'cart'
@@ -113,7 +114,7 @@ function App() {
               <img src={`${API_URL}${item.image_url}`} style={{ width: '64px', height: '64px', borderRadius: '12px', objectFit: 'cover', marginRight: '15px' }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: '600', fontSize: '15px' }}>{item.title}</div>
-                <div style={{ fontSize: '13px', opacity: 0.6 }}>{item.variants?.[0]?.price} ₽ × {item.count}</div>
+                <div style={{ fontSize: '15px', opacity: 0.7 }}>{item.variants?.[0]?.price} ₽ × {item.count}</div>
               </div>
               <div style={{ fontWeight: 'bold', color: 'var(--tg-theme-link-color)' }}>
                 {item.variants?.[0]?.price * item.count} ₽
@@ -134,26 +135,36 @@ function App() {
 
   // --- РЕНДЕРИНГ ГЛАВНОГО ЭКРАНА (ВИТРИНА) ---
   return (
-    <div className="store-container" style={{ padding: '15px', paddingBottom: '100px' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Магазин 🛍️</h2>
+    <div className="store-container" style={{ padding: '5px', paddingBottom: '100px' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Магазин товаров ручной работы🛍️</h2>
       
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
         {products.length === 0 && <p style={{ gridColumn: '1/-1', textAlign: 'center' }}>Загрузка товаров...</p>}
         {products.map(product => (
           <div key={product.id} style={{ 
             background: 'var(--tg-theme-secondary-bg-color, #2c2c2e)', 
-            borderRadius: '15px', 
-            padding: '12px',
+            borderRadius: '16px', 
+            padding: '10px',
             display: 'flex', flexDirection: 'column'
           }}>
             <img 
               src={`${API_URL}${product.image_url}`} 
-              alt={product.title} 
-              style={{ width: '100%', borderRadius: '10px', aspectRatio: '1/1', objectFit: 'cover' }} 
+              alt={product.title}
+              onClick={() => {
+                setSelectedImage(`${API_URL}${product.image_url}`);
+                tg?.HapticFeedback.impactOccurred('medium'); // Вибрация при открытии
+              }}
+              style={{ 
+                width: '100%', 
+                borderRadius: '10px', 
+                aspectRatio: '1/1', 
+                objectFit: 'cover',
+                cursor: 'zoom-in' // Курсор-лупа
+              }} 
             />
-            <h3 style={{ fontSize: '14px', margin: '10px 0 5px 0', minHeight: '34px' }}>{product.title}</h3>
-            <p style={{ fontSize: '12px', opacity: 0.7, marginBottom: '8px' }}>{product.description}</p>
-            <p style={{ fontWeight: 'bold', fontSize: '17px', marginBottom: '12px', color: 'var(--tg-theme-link-color)' }}>
+            <h3 style={{ fontSize: '17px', margin: '10px 0 5px 0', minHeight: '34px' }}>{product.title}</h3>
+            <p style={{ fontSize: '14px', opacity: 0.7, marginBottom: '8px' }}>{product.description}</p>
+            <p style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '12px', color: 'var(--tg-theme-link-color)' }}>
                 {product.variants?.[0]?.price} ₽
             </p>
             
@@ -171,6 +182,43 @@ function App() {
           </div>
         ))}
       </div>
+    {/* МОДАЛЬНОЕ ОКНО ДЛЯ УВЕЛИЧЕНИЯ КАРТИНКИ */}
+{selectedImage && (
+  <div 
+    onClick={() => setSelectedImage(null)} // Закрыть при клике в любое место
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0,0,0,0.9)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      animation: 'fadeIn 0.2s ease'
+    }}
+  >
+    <img 
+      src={selectedImage} 
+      style={{ 
+        maxWidth: '95%', 
+        maxHeight: '80%', 
+        borderRadius: '15px',
+        boxShadow: '0 0 20px rgba(255,255,255,0.1)' 
+      }} 
+    />
+    <div style={{
+      position: 'absolute',
+      top: '20px',
+      right: '20px',
+      color: 'white',
+      fontSize: '30px',
+      fontWeight: 'bold'
+    }}>×</div>
+  </div>
+)}
     </div>
   )
 }
