@@ -13,7 +13,7 @@ origins = [
     "http://localhost",          # Доступ через Nginx локально
     "http://localhost:5173",     # Прямой доступ к Vite (на всякий случай)
     "http://127.0.0.1",          # Доступ через IP локально
-    "https://1gu8xccd4qvb.share.zrok.io", # Доступ через текущий туннель zrok
+    "https://yzgbjiwk5v6k.share.zrok.io",     # Доступ через текущий туннель zrok
 ]
 
 app.add_middleware(

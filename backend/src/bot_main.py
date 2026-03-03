@@ -1,3 +1,4 @@
+import os
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
@@ -9,7 +10,7 @@ from src.bot.handlers.catalog import router as catalog_router
 from src.bot.keyboards.keyboadrs import get_main_menu
 
 
-WEBAPP_URL = "https://1gu8xccd4qvb.share.zrok.io"
+WEBAPP_URL = "https://yzgbjiwk5v6k.share.zrok.io"
 
 async def main():
     # Включаем логирование
