@@ -1,3 +1,4 @@
+import os
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
@@ -6,7 +7,10 @@ from aiogram.filters import Command
 
 from src.core.config import settings
 from src.bot.handlers.catalog import router as catalog_router
+from src.bot.keyboards.keyboadrs import get_main_menu
 
+
+WEBAPP_URL = os.getenv("APP_URL", "").strip()
 
 async def main():
     # Включаем логирование
@@ -23,7 +27,11 @@ async def main():
 
     @dp.message(Command("start"))
     async def send_welcome(message: Message):
-        await message.answer(f"Привет {message.from_user.first_name}! Я бот для интернет-магазина.")
+        await message.answer(
+            f"Привет, {message.from_user.first_name}! 👋\n"
+            "Добро пожаловать в наш новый магазин.",
+            reply_markup=get_main_menu(url=WEBAPP_URL)
+        )
 
     logging.info("Бот запущен и готов к работе...")
     await dp.start_polling(bot)
@@ -31,4 +39,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
 
