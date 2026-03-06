@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.v1.endpoints.products_api import router as product_router
-
+from src.api.v1.endpoints.orders_api import router as order_router
 
 load_dotenv()
 
@@ -39,7 +39,7 @@ if not os.path.exists(UPLOAD_DIR):
 app.mount("/static", StaticFiles(directory=UPLOAD_DIR), name="static")
 # Подключаем роутер с префиксом
 app.include_router(product_router, prefix="/api/v1/products", tags=["Продукты"])
-
+app.include_router(order_router, prefix="/api/v1/orders", tags=["Заказы"])
 
 @app.get("/", tags=["Root"])
 async def root():

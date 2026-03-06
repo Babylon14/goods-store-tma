@@ -61,5 +61,15 @@ class OrderRepository(BaseRepository[Order]):
         return list(result.scalars().all())
 
 
-
+    async def get_all_with_items(self, skip: int = 0, limit: int = 50) -> List[Order]:
+        """Получить список всех заказов с вложенными вариантами. (пагинация)."""
+        query = (
+            select(self.model)
+            .options(selectinload(self.model.items))
+            .offset(skip)
+            .limit(limit)
+            .order_by(self.model.id.desc()) # Сначала новые
+        )
+        result = await self.session.execute(query)
+        return list(result.scalars().all())
 
