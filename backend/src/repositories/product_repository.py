@@ -11,6 +11,24 @@ class ProductRepository(BaseRepository[Product]):
     def __init__(self, session):
         super().__init__(Product, session)
 
+
+    async def get_by_ids(self, ids: List[int]) -> List[Product]:
+        """
+        Получить список товаров по их ID с подгрузкой вариантов.
+        Используется в хендлере заказов для массовой проверки цен и названий.
+        """
+        if not ids:
+            return []
+            
+        query = (
+            select(self.model)
+            .where(self.model.id.in_(ids))  # Ключевое исправление здесь
+            .options(selectinload(self.model.variants))
+        )
+        result = await self.session.execute(query)
+        return list(result.scalars().all())
+    
+    
     async def get_with_variants(self, product_id: int) -> Optional[Product]:
         """
         Получить один товар со всеми его вариантами по ID.
@@ -36,6 +54,7 @@ class ProductRepository(BaseRepository[Product]):
         )
         result = await self.session.execute(query)
         return list(result.scalars().all())
+    
     
     async def create_with_variants(self, obj_in_data: dict) -> Product:
         """

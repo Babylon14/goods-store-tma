@@ -1,13 +1,17 @@
 import os
 from dotenv import load_dotenv
 import json
-from aiogram import Router, F, Bot
+from aiogram import Router, F, Bot, types
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.models.product import Product
+from src.repositories.order_repository import OrderRepository
+from src.repositories.product_repository import ProductRepository
+from src.schemas.order_schema import OrderCreate, OrderItemCreate
+from src.core.config import settings
 
 
 load_dotenv()
@@ -30,12 +34,12 @@ async def handle_web_app_data(message: Message, db_session: AsyncSession, bot: B
 
         if not cart_items:
             await message.answer("Корзина пуста.")
-            return 
+            return
         
         # Превращаем ключи (ID) в числа
         product_ids = [int(pid) for pid in cart_items.keys()]
 
-        # 2. Запрос в БД для получения НАЗВАНИЙ и АКТУАЛЬНЫХ ЦЕН
+        # 3. Запрос в БД для получения НАЗВАНИЙ и АКТУАЛЬНЫХ ЦЕН
         query = (
             select(Product)
             .where(Product.id.in_(product_ids))
@@ -54,8 +58,7 @@ async def handle_web_app_data(message: Message, db_session: AsyncSession, bot: B
             price = product.variants[0].price if product.variants else 0
             subtotal = price * quantity
             calculated_total += subtotal
-            items_details += f"🔹 <b>{product.title}</b>\n"
-            items_details += f"   {quantity} шт. × {price} ₽ = {subtotal} ₽\n"
+
         # Собираем итоговый текст заказа
         order_text = "<b>📦 СОСТАВ ЗАКАЗА:</b>\n"
         order_text += items_details
@@ -79,5 +82,4 @@ async def handle_web_app_data(message: Message, db_session: AsyncSession, bot: B
     except Exception as e:
         print(f"❌ Ошибка при обработке заказа: {e}")
         await message.answer("Произошла ошибка при обработке заказа. Попробуйте позже.")
-
 
