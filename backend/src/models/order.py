@@ -1,5 +1,5 @@
 from decimal import Decimal as PyDecimal
-from sqlalchemy import Integer, String, ForeignKey, Numeric
+from sqlalchemy import Integer, String, ForeignKey, Numeric, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List
 
@@ -9,7 +9,7 @@ from src.db.base_class import Base
 class Order(Base):
     """Модель заказа"""
 
-    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    user_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     user_name: Mapped[str] = mapped_column(String(255), nullable=True)
     total_price: Mapped[PyDecimal] = mapped_column(Numeric(10, 2), nullable=False)
     status: Mapped[str] = mapped_column(String(50), default="в ожидании") 
