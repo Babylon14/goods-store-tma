@@ -25,7 +25,10 @@ class OrderRepository(BaseRepository[Order]):
 
         # 2. Создаем позиции заказа (OrderItems)
         for item_data in order_in_data.items:
-            db_item = OrderItem(**item_data)
+            db_item = OrderItem(
+                order_id=db_order.id,
+                **item_data.model_dump()
+            )
             self.session.add(db_item)
         
         # 3. Фиксируем транзакцию
