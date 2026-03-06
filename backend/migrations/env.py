@@ -11,6 +11,7 @@ from alembic import context
 from src.core.config import settings
 from src.db.base import Base
 from src.models.product import Product, ProductVariant
+from src.models.order import Order, OrderItem
 
 
 config = context.config
