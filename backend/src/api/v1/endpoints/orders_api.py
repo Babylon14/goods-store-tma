@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from src.schemas.order_schema import OrderRead, OrderUpdateStatus
 from src.repositories.order_repository import OrderRepository
 from src.api.dependencies import get_order_repo
+from src.services.notification_service import notify_order_status_change
 
 
 router = APIRouter()
@@ -39,10 +40,20 @@ async def update_order_status(
     order_repo: OrderRepository = Depends(get_order_repo)
 ):
     """Смена статуса (например, из админки)"""
-    try:
-        updated_order = await order_repo.update_status(order_id, status_data.status)
-        return await order_repo.get_with_items(updated_order.id)
-    except Exception as err:
+    # 1. Получаем тек
+    # ущий заказ, чтобы узнать user_id
+    db_order = await order_repo.get(order_id)
+    if not db_order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Заказ не найден")
+    updated_order = await order_repo.update_status(order_id, status_data.status)
+    
+    # 3. Отправляем уведомление в Телеграм (фоновая задача)
+    await notify_order_status_change(
+        user_id=db_order.user_id, 
+        order_id=order_id, 
+        new_status=status_data.status
+    )
+    # 4. Возвращаем ответ в Swagger/Админку
+    return await order_repo.get_with_items(updated_order.id)
 
 
