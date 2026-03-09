@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -72,4 +72,21 @@ class OrderRepository(BaseRepository[Order]):
         )
         result = await self.session.execute(query)
         return list(result.scalars().all())
+
+
+    async def update_status(self, order_id: int, new_status: str) -> Order:
+        """Обновляет статус заказа и возвращает обновленный объект."""
+        query = (
+            update(self.model)
+            .where(self.model.id == order_id)
+            .values(status=new_status)
+            .returning(self.model)
+        )
+        result = await self.session.execute(query)
+        await self.session.commit()
+        return result.scalar_one()
+
+
+
+
 
