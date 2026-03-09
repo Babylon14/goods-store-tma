@@ -39,11 +39,10 @@ async def update_order_status(
     order_repo: OrderRepository = Depends(get_order_repo)
 ):
     """Смена статуса (например, из админки)"""
-    db_order = await order_repo.get(order_id)
-    if not db_order:
+    try:
+        updated_order = await order_repo.update_status(order_id, status_data.status)
+        return await order_repo.get_with_items(updated_order.id)
+    except Exception as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Заказ не найден")
-    
-    updated_order = await order_repo.update(db_obj=db_order, obj_in_data=status_data)
-    return updated_order
 
 
