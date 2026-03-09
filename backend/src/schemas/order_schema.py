@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from decimal import Decimal as PyDecimal
 from typing import List, Optional
 from datetime import datetime
+from enum import Enum
 
 
 # --- СХЕМЫ ДЛЯ ПОЗИЦИЙ ЗАКАЗА (OrderItem) ---
@@ -47,8 +48,17 @@ class OrderRead(OrderBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class OrderStatus(str, Enum):
+    """Статусы заказа"""
+    PENDING = "В ожидании"
+    PAID = "Оплачен"
+    SHIPPED = "Отправлен"
+    DELIVERED = "Доставлен"
+    CANCELLED = "Отменен"
+
+
 class OrderUpdateStatus(BaseModel):
     """Для смены статуса заказа (например, из группы админа)"""
-    status: str
+    status: OrderStatus
 
     
