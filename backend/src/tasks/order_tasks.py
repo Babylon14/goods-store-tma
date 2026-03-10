@@ -1,13 +1,12 @@
 import asyncio
-from celery import shared_task
 
+from src.core.celery_app import celery_app
 from src.bot_main import bot
-from src.schemas.order_schema import OrderStatus
 from src.services.notification_service import STATUS_NAMES
 
 
-@shared_task(name="send_order_notification")
-def send_order_notification_task(user_id: int, order_id: int, new_status: str):
+@celery_app.task(name="send_status_notification")
+def send_status_notification_task(user_id: int, order_id: int, new_status: str):
     """Фоновая задача на отправку сообщения"""
     status_text = STATUS_NAMES.get(new_status, new_status)
     message = (

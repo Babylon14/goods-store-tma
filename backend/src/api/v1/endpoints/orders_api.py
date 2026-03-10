@@ -5,7 +5,7 @@ from src.schemas.order_schema import OrderRead, OrderUpdateStatus
 from src.repositories.order_repository import OrderRepository
 from src.api.dependencies import get_order_repo
 from src.services.notification_service import notify_order_status_change
-from src.tasks.order_tasks import send_order_notification_task
+from src.tasks.order_tasks import send_status_notification_task
 
 
 router = APIRouter()
@@ -49,7 +49,7 @@ async def update_order_status(
     updated_order = await order_repo.update_status(order_id, status_data.status)
 
     # 2. Отправляем уведомление в Celery (задача улетает в Redis)
-    send_order_notification_task.delay(
+    send_status_notification_task.delay(
         user_id=db_order.user_id, 
         order_id=order_id, 
         new_status=status_data.status
