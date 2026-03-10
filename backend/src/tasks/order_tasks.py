@@ -7,7 +7,7 @@ from src.services.notification_service import STATUS_NAMES
 
 
 @shared_task(name="send_order_notification")
-def send_order_notification(user_id: int, order_id: int, new_status: str):
+def send_order_notification_task(user_id: int, order_id: int, new_status: str):
     """Фоновая задача на отправку сообщения"""
     status_text = STATUS_NAMES.get(new_status, new_status)
     message = (
@@ -21,4 +21,3 @@ def send_order_notification(user_id: int, order_id: int, new_status: str):
     )
 
 
-    
