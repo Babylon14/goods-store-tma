@@ -39,9 +39,9 @@ app.add_middleware(
 # Создаем папку для загрузок, если её нет
 UPLOAD_DIR = "/app/backend/uploads"
 if not os.path.exists(UPLOAD_DIR):
-    os.makedirs(UPLOAD_DIR)
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# говорим FastAPI, что всё, что летит на /static, нужно искать в папке uploads
+# Монтируем статику
 app.mount("/static", StaticFiles(directory=UPLOAD_DIR), name="static")
 # Подключаем роутер с префиксом
 app.include_router(product_router, prefix="/v1/products", tags=["Продукты"])

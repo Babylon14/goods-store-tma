@@ -18,16 +18,17 @@ load_dotenv()
 
 WEBAPP_URL = os.getenv("WEBAPP_URL", "").strip()
 
-async def main():
-    # Включаем логирование
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-    )
-    # Инициализируем бота и диспетчер
-    bot = Bot(token=settings.BOT_TOKEN)
-    dp = Dispatcher()
+# Включаем логирование
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    force=True
+)
+# Инициализируем бота и диспетчер
+bot = Bot(token=settings.BOT_TOKEN)
+dp = Dispatcher()
 
+async def main():
     # Регистрируем middleware
     dp.message.middleware(DbSessionMiddleware(session_pool=async_session))
 
@@ -42,7 +43,6 @@ async def main():
             "Добро пожаловать в наш новый магазин.",
             reply_markup=get_main_menu(WEBAPP_URL)
         )
-
     logging.info("Бот запущен и готов к работе...")
     await dp.start_polling(bot)
 
