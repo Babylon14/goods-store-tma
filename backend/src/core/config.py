@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     BOT_TOKEN: str
     PAYMENT_PROVIDER_TOKEN: str
     MANAGER_ID: int
+    ADMIN_ID: int
 
     model_config = SettingsConfigDict(
         env_file=".env",

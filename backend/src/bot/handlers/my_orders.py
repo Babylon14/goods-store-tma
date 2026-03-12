@@ -1,5 +1,5 @@
 import os
-from aiogram import Router, F
+from aiogram import Bot, Router, F
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +9,8 @@ from src.repositories.order_repository import OrderRepository
 
 load_dotenv()
 router = Router()
-MANAGER_ID = os.getenv("MANAGER_ID")
+
+ADMIN_ID = os.getenv("ADMIN_ID", "")
 
 @router.message(F.text =="📦 Мои заказы")
 async def show_my_orders(message: Message, db_session: AsyncSession):
@@ -72,11 +73,14 @@ async def show_order_details(callback: CallbackQuery, db_session: AsyncSession):
         details += f"🔹 {item.title} — {item.quantity} шт. ({item.price} ₽)\n"
     details += f"\n<b>Итого: {target_order.total_price} ₽</b>"
 
+    # DEBUG
+    print(f"DEBUG: Нажал кнопку ID={callback.from_user.id}, ADMIN_ID={ADMIN_ID}")
+
     # Создаем клавиатуру
     keyboard = InlineKeyboardBuilder()
 
     # Если нажал админ — добавляем кнопку управления
-    if callback.from_user.id == MANAGER_ID:
+    if callback.from_user.id == int(ADMIN_ID):
         keyboard.button(text="🔧 Изменить статус (ADMIN)", callback_data=f"admin_status_{order_id}")
     keyboard.adjust(1)
     
@@ -103,4 +107,36 @@ async def admin_choose_status(callback: CallbackQuery):
     await callback.message.edit_text(
         f"Выберите новый статус для заказа №{order_id}:", reply_markup=keyboard.as_markup()
     )
+
+
+@router.callback_query(F.data.startswith("set_status_"))
+async def admin_set_status(callback: CallbackQuery, db_session: AsyncSession, bot: Bot):
+    """Хендлер АДМИНА для изменения статуса заказа."""
+
+    # Парсим данные: set_status_10_Оплачен
+    data = callback.data.split("_")
+    order_id = int(data[-2])
+    new_status = data[-1]
+
+    repo = OrderRepository(db_session)
+    order = await repo.get_with_items(order_id)
+
+    if order:
+        order.status = new_status
+        await db_session.commit()
+        await callback.message.edit_text(f"✅ Статус заказа №{order_id} был изменен на '{new_status}'")
+
+        # ОТПРАВКА УВЕДОМЛЕНИЯ КЛИЕНТУ
+        try:
+            notification_text = (
+                f"🔔 <b>Обновление по заказу №{order_id}!</b>\n\n"
+                f"Новый статус: <b>{new_status}</b>"
+            )
+            await bot.send_message(chat_id=order.user_id, text=notification_text, parse_mode="HTML")
+        except Exception as e:
+            await callback.message.answer(
+                f"⚠️ Статус изменен, но не удалось уведомить клиента (возможно, бот заблокирован)."
+            )
+    await callback.answer()
+
 
