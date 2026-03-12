@@ -57,7 +57,8 @@ def check_payment_reminder_task(user_id: int, order_id: int):
                 text = (
                     f"⚠️ **Ваш заказ №{order_id} ожидает оплаты**\n\n"
                     f"Вы не завершили оформление. Если возникли трудности, "
-                    f"напишите в поддержку. Мы придержали товары для вас! 📦"
+                    f"нажмите на кнопку О нас. Там вы найдете наши контакты.\n\n"
+                    f"Мы придержали товары для вас! 📦"
                 )
                 await bot.send_message(chat_id=user_id, text=text, parse_mode="Markdown")
                 logger.info(f"Напоминание отправлено для заказа {order_id}")
