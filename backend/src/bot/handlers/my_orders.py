@@ -52,7 +52,7 @@ async def show_my_orders(message: Message, db_session: AsyncSession):
 
 @router.callback_query(F.data.startswith("order_details_"))
 async def show_order_details(callback: CallbackQuery, db_session: AsyncSession):
-    order_id = int(callback.data.split("_")[1])
+    order_id = int(callback.data.split("_")[-1])
     repo = OrderRepository(db_session)
 
     order = await repo.get_user_orders(callback.from_user.id)

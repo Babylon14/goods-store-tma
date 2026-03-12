@@ -33,6 +33,7 @@ dp = Dispatcher()
 async def main():
     # Регистрируем middleware
     dp.message.middleware(DbSessionMiddleware(session_pool=async_session))
+    dp.callback_query.middleware(DbSessionMiddleware(session_pool=async_session))
 
     # Регистрируем роутеры
     dp.include_router(catalog_router)
