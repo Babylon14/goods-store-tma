@@ -1,11 +1,15 @@
+import os
 from aiogram import Router, F
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from dotenv import load_dotenv
 from src.repositories.order_repository import OrderRepository
 
 
+load_dotenv()
 router = Router()
+MANAGER_ID = os.getenv("MANAGER_ID")
 
 @router.message(F.text =="📦 Мои заказы")
 async def show_my_orders(message: Message, db_session: AsyncSession):
@@ -52,6 +56,7 @@ async def show_my_orders(message: Message, db_session: AsyncSession):
 
 @router.callback_query(F.data.startswith("order_details_"))
 async def show_order_details(callback: CallbackQuery, db_session: AsyncSession):
+    """Хендлер для отображения деталей заказа."""
     order_id = int(callback.data.split("_")[-1])
     repo = OrderRepository(db_session)
 
@@ -67,7 +72,35 @@ async def show_order_details(callback: CallbackQuery, db_session: AsyncSession):
         details += f"🔹 {item.title} — {item.quantity} шт. ({item.price} ₽)\n"
     details += f"\n<b>Итого: {target_order.total_price} ₽</b>"
 
+    # Создаем клавиатуру
+    keyboard = InlineKeyboardBuilder()
+
+    # Если нажал админ — добавляем кнопку управления
+    if callback.from_user.id == MANAGER_ID:
+        keyboard.button(text="🔧 Изменить статус (ADMIN)", callback_data=f"admin_status_{order_id}")
+    keyboard.adjust(1)
+    
     # Отправляем новым сообщением или меняем текущее
-    await callback.message.answer(details, parse_mode="HTML")
+    await callback.message.answer(details, reply_markup=keyboard.as_markup(), parse_mode="HTML")
     await callback.answer()
+
+
+@router.callback_query(F.data.startswith("admin_status_"))
+async def admin_choose_status(callback: CallbackQuery):
+    """Хендлер АДМИНА для выбора статуса заказа."""
+    order_id = int(callback.data.split("_")[-1])
+
+    # Создаем клавиатуру
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.button(text="📦 В ожидании", callback_data=f"set_status_{order_id}_В ожидании")
+    keyboard.button(text="✅ Оплачен", callback_data=f"set_status_{order_id}_Оплачен")
+    keyboard.button(text="🚛 Отправлен", callback_data=f"set_status_{order_id}_Отправлен")
+    keyboard.button(text="🚚 Доставлен", callback_data=f"set_status_{order_id}_Доставлен")
+    keyboard.button(text="❌ Отменен", callback_data=f"set_status_{order_id}_Отменен")
+    keyboard.adjust(2)
+
+    await callback.message.edit_text(
+        f"Выберите новый статус для заказа №{order_id}:", reply_markup=keyboard.as_markup()
+    )
 
