@@ -50,7 +50,7 @@ class OrderRepository(BaseRepository[Order]):
         
 
     async def get_user_orders(self, user_id: int) -> List[Order]:
-        """Получить историю заказов конкретного пользователя."""
+        """Получить историю всех заказов пользователя, отсортированные по дате (новые сверху)."""
         query = (
             select(self.model)
             .where(self.model.user_id == user_id)

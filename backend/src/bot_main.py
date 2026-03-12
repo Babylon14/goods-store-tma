@@ -9,6 +9,8 @@ from aiogram.filters import Command
 from src.core.config import settings
 from src.bot.handlers.catalog import router as catalog_router
 from src.bot.handlers.accept_order import router as web_app_router
+from src.bot.handlers.my_orders import router as my_orders_router
+from src.bot.handlers.info import router as info_router
 from src.bot.keyboards.keyboadrs import get_main_menu
 from src.bot.middlewares.db import DbSessionMiddleware
 from src.db.session import async_session
@@ -31,10 +33,13 @@ dp = Dispatcher()
 async def main():
     # Регистрируем middleware
     dp.message.middleware(DbSessionMiddleware(session_pool=async_session))
+    dp.callback_query.middleware(DbSessionMiddleware(session_pool=async_session))
 
     # Регистрируем роутеры
     dp.include_router(catalog_router)
     dp.include_router(web_app_router)
+    dp.include_router(info_router)
+    dp.include_router(my_orders_router)
 
     @dp.message(Command("start"))
     async def send_welcome(message: Message):

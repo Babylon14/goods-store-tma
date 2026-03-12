@@ -23,7 +23,9 @@ async def handle_web_app_data(message: Message, db_session: AsyncSession, bot: B
     Принимает JSON из Mini App, запрашивает детали товаров в БД
     и формирует итоговый чек.
     """
-    # 1. Инициализируем переменные
+    from src.tasks.order_tasks import check_payment_reminder_task
+    
+    # Инициализируем переменные
     items_summary_text = ""
     order_items_list = []
     calculated_total = 0
@@ -76,21 +78,26 @@ async def handle_web_app_data(message: Message, db_session: AsyncSession, bot: B
         # 5. Сохраняем заказ в БД
         new_order = await order_repo.create_with_items(order_create_data)
 
-        # 6. Формируем финальный текст
+        # 6. Запускаем Celery задачу на напоминание
+        check_payment_reminder_task.apply_async(
+            args=[message.from_user.id, new_order.id],
+            countdown=60. # Через сколько секунд придет напоминание
+        )
+        # 7. Формируем финальный текст
         order_text = f"<b>📦 ЗАКАЗ №{new_order.id}</b>\n"
         order_text += "--------------------------\n"
         order_text += items_summary_text
         order_text += "--------------------------\n"
         order_text += f"💰 <b>ИТОГО: {calculated_total} ₽</b>"
 
-        # 7. Отправляем ответ пользователю
+        # 8. Отправляем ответ пользователю
         await message.answer(f"✅ Ваш заказ принят!\n\n{order_text}\n\n📞 Менеджер свяжется с вами в ближайшее время.", parse_mode="HTML")
 
-        # 8. Формируем сообщение для админа
+        # 9. Формируем сообщение для админа
         if settings.MANAGER_ID:
             admin_report = "<b>🔔 НОВЫЙ ЗАКАЗ!</b>\n\n"
             admin_report += f"👤 Покупатель: @{message.from_user.username or message.from_user.id}\n\n{order_text}"
-            # 9. Отправляем админу
+            # 10. Отправляем админу
             await bot.send_message(chat_id=settings.MANAGER_ID, text=admin_report, parse_mode="HTML")
     
     except Exception as err:
