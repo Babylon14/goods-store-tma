@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repositories.order_repository import OrderRepository
@@ -48,3 +48,26 @@ async def show_my_orders(message: Message, db_session: AsyncSession):
         ])
 
         await message.answer(text=text, reply_markup=view_order_button, parse_mode="HTML")
+
+
+@router.callback_query(F.data.startswith("order_details_"))
+async def show_order_details(callback: CallbackQuery, db_session: AsyncSession):
+    order_id = int(callback.data.split("_")[1])
+    repo = OrderRepository(db_session)
+
+    order = await repo.get_user_orders(callback.from_user.id)
+    target_order = next((o for o in order if o.id == order_id), None)
+
+    if not target_order:
+        await callback.answer("Заказ не найден", show_alert=True)
+        return
+    
+    details = f"<b>📦 Состав заказа №{order_id}:</b>\n\n"
+    for item in target_order.items:
+        details += f"🔹 {item.title} — {item.quantity} шт. ({item.price} ₽)\n"
+    details += f"\n<b>Итого: {target_order.total_price} ₽</b>"
+
+    # Отправляем новым сообщением или меняем текущее
+    await callback.message.answer(details, parse_mode="HTML")
+    await callback.answer()
+
